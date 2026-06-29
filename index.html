@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f9f91">
+<title>Meu Financeiro & Saúde 2.0</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style>
+:root{
+  --bg:#f4f7fb;--surface:#ffffff;--surface2:#f7f9fc;--text:#172033;--muted:#748094;
+  --line:#e5eaf1;--primary:#0f9f91;--primary2:#087f75;--green:#12a36d;--red:#eb3b5a;
+  --amber:#e9a11b;--blue:#3b82f6;--purple:#8b5cf6;--shadow:0 12px 30px rgba(31,41,55,.09);
+}
+[data-theme="dark"]{
+  --bg:#0b1220;--surface:#111a2b;--surface2:#162136;--text:#edf3ff;--muted:#9aa8bd;
+  --line:#28364d;--primary:#20b6a8;--primary2:#149b8e;--green:#32c987;--red:#ff6078;
+  --amber:#f5b642;--blue:#60a5fa;--purple:#a78bfa;--shadow:0 12px 30px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  min-height:100vh;padding-bottom:88px;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{width:min(100%,980px);margin:auto;padding:18px 16px 34px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 18px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{
+  width:42px;height:42px;border-radius:14px;display:grid;place-items:center;
+  color:#fff;background:linear-gradient(135deg,var(--primary),#30c7b8);font-size:22px;
+  box-shadow:0 9px 18px rgba(15,159,145,.25)
+}
+.brand h1{font-size:20px;margin:0}.brand small{display:block;color:var(--muted);margin-top:2px}
+.icon-btn,.mini-btn{
+  border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:14px;
+  min-width:42px;height:42px;padding:0 12px;box-shadow:var(--shadow)
+}
+.view{display:none}.view.active{display:block}
+.grid{display:grid;gap:14px}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px;
+  box-shadow:var(--shadow)
+}
+.card h2,.card h3{margin:0 0 12px}
+.card h2{font-size:17px}.card h3{font-size:15px}
+.hero{padding:22px}
+.hero-label{font-size:13px;color:var(--muted)}
+.hero-balance{font-size:34px;font-weight:850;letter-spacing:-1px;margin:4px 0 15px}
+.summary-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.summary-box{border-radius:15px;padding:12px;background:var(--surface2);border:1px solid var(--line)}
+.summary-box small{display:block;color:var(--muted);margin-bottom:5px}
+.summary-box b{font-size:15px}
+.good{color:var(--green)!important}.bad{color:var(--red)!important}.warn{color:var(--amber)!important}
+.muted{color:var(--muted)}.tiny{font-size:12px}.right{text-align:right}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:20px 2px 10px}
+.section-title h2{font-size:17px;margin:0}.section-title button{border:0;background:none;color:var(--primary);font-weight:750}
+.progress{height:11px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.progress span{height:100%;display:block;border-radius:99px;background:var(--primary);transition:width .3s}
+.progress span.warning{background:var(--amber)}.progress span.danger{background:var(--red)}
+.budget-head,.row-between{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stat{min-height:118px}
+.stat .label{color:var(--muted);font-size:12px}.stat .value{font-weight:850;font-size:22px;margin-top:8px}
+.stat .hint{font-size:12px;color:var(--muted);margin-top:8px}
+.score{display:flex;align-items:center;gap:15px}
+.ring{
+  position:relative;--p:0;--ring:var(--primary);width:76px;height:76px;border-radius:50%;
+  background:conic-gradient(var(--ring) calc(var(--p)*1%),var(--surface2) 0);
+  display:grid;place-items:center;flex:0 0 auto
+}
+.ring:after{content:"";width:57px;height:57px;border-radius:50%;background:var(--surface);position:absolute}
+.ring b{position:relative;z-index:1;font-size:18px}
+form{margin:0}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field.full{grid-column:1/-1}
+label{font-size:12px;color:var(--muted);font-weight:700;display:block;margin:0 0 6px}
+input,select,textarea{
+  width:100%;border:1px solid var(--line);background:var(--surface2);color:var(--text);
+  border-radius:14px;padding:12px 13px;outline:none
+}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,159,145,.12)}
+textarea{min-height:82px;resize:vertical}
+.btn{
+  border:0;border-radius:14px;padding:13px 16px;font-weight:800;background:var(--primary);color:#fff
+}
+.btn:hover{background:var(--primary2)}
+.btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line)}
+.btn.danger{background:var(--red)}
+.btn.small{padding:9px 11px;font-size:12px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.quick-types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}
+.quick-type{
+  border:1px solid var(--line);background:var(--surface2);color:var(--muted);border-radius:12px;
+  padding:10px 8px;font-weight:750
+}
+.quick-type.active{background:rgba(15,159,145,.12);color:var(--primary);border-color:var(--primary)}
+.list{display:grid;gap:10px}
+.item{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;
+  padding:13px;border:1px solid var(--line);border-radius:17px;background:var(--surface)
+}
+.item-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--surface2);font-size:19px}
+.item-title{font-weight:780}.item-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.item-value{font-weight:850;white-space:nowrap}.item-actions{display:flex;justify-content:flex-end;gap:5px;margin-top:6px}
+.link-btn{border:0;background:none;color:var(--muted);font-size:12px;padding:2px 3px}
+.link-btn:hover{color:var(--primary)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.category-row{margin:13px 0}
+.category-row .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.category-row .progress{height:8px}
+.empty{text-align:center;color:var(--muted);padding:24px 10px}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:7px 10px;font-size:12px}
+.badge{display:inline-block;border-radius:999px;background:var(--surface2);border:1px solid var(--line);padding:4px 8px;font-size:11px;color:var(--muted)}
+.goal{padding:14px;border:1px solid var(--line);border-radius:17px;margin-top:10px}
+.goal h4{margin:0 0 5px}.goal .meta{font-size:12px;color:var(--muted);margin-bottom:9px}
+.health-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.health-tile{background:var(--surface2);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}
+.health-tile b{display:block;font-size:18px;margin-top:5px}
+.check-row{display:flex;align-items:center;gap:9px;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.check-row input{width:auto}
+.tip{
+  border-left:4px solid var(--primary);padding:12px 13px;background:var(--surface2);
+  border-radius:4px 14px 14px 4px;margin:9px 0
+}
+.notice{font-size:12px;color:var(--muted);line-height:1.5}
+.bottom-nav{
+  position:fixed;z-index:50;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,980px);
+  display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:9px max(10px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+  background:color-mix(in srgb,var(--surface) 94%,transparent);border-top:1px solid var(--line);
+  backdrop-filter:blur(15px)
+}
+.nav-btn{border:0;background:none;color:var(--muted);border-radius:13px;padding:7px 4px;font-size:11px;font-weight:700}
+.nav-btn span{display:block;font-size:20px;line-height:21px;margin-bottom:2px}
+.nav-btn.active{background:rgba(15,159,145,.12);color:var(--primary)}
+.toast{
+  position:fixed;z-index:100;left:50%;bottom:94px;transform:translate(-50%,20px);
+  background:#172033;color:#fff;border-radius:13px;padding:11px 16px;font-size:13px;
+  opacity:0;pointer-events:none;transition:.25s
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{
+  position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.46);display:none;align-items:flex-end;justify-content:center
+}
+.modal.open{display:flex}
+.modal-sheet{
+  width:min(100%,680px);max-height:91vh;overflow:auto;background:var(--bg);border-radius:25px 25px 0 0;
+  padding:18px 16px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px rgba(0,0,0,.25)
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.modal-head h2{margin:0;font-size:19px}
+.close{border:0;background:var(--surface);color:var(--text);width:38px;height:38px;border-radius:12px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--muted)}
+.pie{
+  width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--primary) 0 100%);
+  margin:7px auto 16px;position:relative
+}
+.pie:after{content:"";position:absolute;inset:25px;background:var(--surface);border-radius:50%}
+.settings-grid{display:grid;gap:12px}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+@media(max-width:720px){
+  .grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .app{padding:14px 12px 28px}
+  .grid.two,.form-grid{grid-template-columns:1fr}
+  .grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .field.full{grid-column:auto}
+  .summary-row{grid-template-columns:1fr 1fr}
+  .summary-row .summary-box:last-child{grid-column:1/-1}
+  .filters{grid-template-columns:1fr}
+  .health-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero-balance{font-size:30px}
+}
+@media print{
+  .bottom-nav,.topbar .icon-btn,.actions,.btn,.link-btn{display:none!important}
+  body{padding:0;background:#fff}.app{width:100%;max-width:none}.view{display:block!important}
+  .card{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">◆</div>
+      <div><h1 id="appTitle">Meu Financeiro</h1><small>Finanças e bem-estar em equilíbrio</small></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="icon-btn" id="installBtn" title="Instalar aplicativo" style="display:none">⬇</button>
+      <button class="icon-btn" id="themeBtn" title="Alternar tema">◐</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="view active" id="view-home">
+      <div class="card hero">
+        <div class="hero-label">Saldo disponível</div>
+        <div class="hero-balance" id="homeBalance">R$ 0,00</div>
+        <div class="summary-row">
+          <div class="summary-box"><small>Entradas do mês</small><b class="good" id="homeIncome">R$ 0,00</b></div>
+          <div class="summary-box"><small>Gastos do mês</small><b class="bad" id="homeExpense">R$ 0,00</b></div>
+          <div class="summary-box"><small>Investido no mês</small><b id="homeInvest">R$ 0,00</b></div>
+        </div>
+        <div class="actions" style="margin-top:14px">
+          <button class="btn" onclick="openTransactionModal()">+ Adicionar registro</button>
+          <button class="btn secondary" onclick="showView('assistant')">✦ Ver dicas inteligentes</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <div class="budget-head"><div><b>Meta mensal de gastos</b><div class="tiny muted" id="budgetText"></div></div><b id="budgetPct">0%</b></div>
+        <div class="progress" style="margin-top:11px"><span id="budgetBar" style="width:0"></span></div>
+        <div class="tiny muted" id="budgetHint" style="margin-top:8px"></div>
+      </div>
+
+      <div class="section-title"><h2>Visão geral</h2><button onclick="openSettings()">Configurar</button></div>
+      <div class="grid four">
+        <div class="card stat"><div class="label">Patrimônio controlado</div><div class="value" id="netWorth">R$ 0,00</div><div class="hint">Saldo + investimentos registrados</div></div>
+        <div class="card stat"><div class="label">Projeção com pendências</div><div class="value" id="projectedBalance">R$ 0,00</div><div class="hint">Inclui valores planejados</div></div>
+        <div class="card stat"><div class="label">Taxa de poupança</div><div class="value" id="savingRate">0%</div><div class="hint">Quanto sobrou das entradas</div></div>
+        <div class="card stat"><div class="label">Dias sem impulso</div><div class="value" id="noImpulseStreak">0</div><div class="hint">Sequência de disciplina</div></div>
+      </div>
+
+      <div class="section-title"><h2>Saúde integral</h2><button onclick="showView('health')">Registrar hoje</button></div>
+      <div class="grid two">
+        <div class="card">
+          <div class="score">
+            <div class="ring" id="financeRing"><b id="financeScore">0</b></div>
+            <div><b>Saúde financeira</b><div class="tiny muted" id="financeScoreText">Adicione lançamentos para calcular.</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="score">
+            <div class="ring" id="healthRing" style="--ring:var(--blue)"><b id="healthScore">0</b></div>
+            <div><b>Saúde pessoal</b><div class="tiny muted" id="healthScoreText">Registre sono, água e atividade.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><h2>Últimos registros</h2><button onclick="showView('transactions')">Ver todos</button></div>
+      <div class="list" id="recentList"></div>
+    </section>
+
+    <section class="view" id="view-transactions">
+      <div class="section-title" style="margin-top:0"><h2>Lançamentos</h2><button onclick="openTransactionModal()">+ Novo</button></div>
+      <div class="card">
+        <div class="filters">
+          <div><label>Mês</label><input type="month" id="transactionMonth"></div>
+          <div><label>Buscar</label><input type="search" id="transactionSearch" placeholder="Descrição, categoria ou conta"></div>
+        </div>
+        <div class="chips" id="typeFilters">
+          <button class="chip" data-type="all">Todos</button>
+          <button class="chip" data-type="expense">Gastos</button>
+          <button class="chip" data-type="income">Entradas</button>
+          <button class="chip" data-type="investment">Investimentos</button>
+          <button class="chip" data-type="planned">Planejados</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:13px">
+        <div class="row-between"><h2>Registros</h2><b id="filteredTotal">R$ 0,00</b></div>
+        <div class="list" id="transactionList"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-planner">
+      <div class="section-title" style="margin-top:0"><h2>Planejamento</h2><button onclick="openGoalModal()">+ Meta</button></div>
+      <div class="grid two">
+        <div class="card">
+          <h2>Metas financeiras</h2>
+          <div id="goalsList"></div>
+        </div>
+        <div class="card">
+          <h2>Orçamento por categoria</h2>
+          <div id="categoryBudgetList"></div>
+          <button class="btn secondary" style="width:100%;margin-top:10px" onclick="openBudgetModal()">Definir limites</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="row-between"><h2>Contas e entradas programadas</h2><button class="btn small secondary" onclick="openTransactionModal('planned')">Adicionar</button></div>
+        <div class="list" id="plannedList"></div>
+      </div>
+      <div class="grid two" style="margin-top:14px">
+        <div class="card">
+          <div class="row-between"><h2>Recorrências</h2><button class="btn small secondary" onclick="openRecurringModal()">+ Nova</button></div>
+          <p class="notice">Use para aluguel, internet, salário, assinaturas e outras contas mensais.</p>
+          <div class="actions" style="margin-bottom:10px"><button class="btn small" onclick="generateRecurringForMonth()">Gerar mês atual</button></div>
+          <div class="list" id="recurringList"></div>
+        </div>
+        <div class="card">
+          <div class="row-between"><h2>Parcelamentos</h2><button class="btn small secondary" onclick="openInstallmentModal()">+ Novo</button></div>
+          <p class="notice">Controle compras parceladas, parcelas restantes e valor total pendente.</p>
+          <div class="actions" style="margin-bottom:10px"><button class="btn small" onclick="generateInstallmentsForMonth()">Gerar mês atual</button></div>
+          <div class="list" id="installmentList"></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Resumo por categoria</h2>
+        <div class="pie" id="categoryPie"></div>
+        <div id="categorySummary"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-health">
+      <div class="section-title" style="margin-top:0"><h2>Saúde e disciplina</h2><span class="tiny muted">Acompanhamento pessoal</span></div>
+      <div class="card">
+        <form id="healthForm">
+          <div class="form-grid">
+            <div><label>Data</label><input type="date" id="healthDate" required></div>
+            <div><label>Água (ml)</label><input type="number" id="waterMl" min="0" step="100" placeholder="Ex.: 2000"></div>
+            <div><label>Sono (horas)</label><input type="number" id="sleepHours" min="0" max="24" step="0.5" placeholder="Ex.: 7.5"></div>
+            <div><label>Atividade física (min)</label><input type="number" id="exerciseMin" min="0" step="5" placeholder="Ex.: 30"></div>
+            <div><label>Humor</label><select id="mood"><option value="">Não informar</option><option value="1">1 — Muito ruim</option><option value="2">2 — Ruim</option><option value="3">3 — Regular</option><option value="4">4 — Bom</option><option value="5">5 — Excelente</option></select></div>
+            <div><label>Estresse</label><select id="stress"><option value="">Não informar</option><option value="1">1 — Baixo</option><option value="2">2</option><option value="3">3 — Moderado</option><option value="4">4</option><option value="5">5 — Muito alto</option></select></div>
+            <div class="field full"><label>Observação</label><textarea id="healthNote" placeholder="Como foi seu dia?"></textarea></div>
+            <div class="field full">
+              <label class="check-row"><input type="checkbox" id="noImpulse"> Passei o dia sem compra por impulso</label>
+            </div>
+            <div class="field full"><button class="btn" type="submit" style="width:100%">Salvar registro diário</button></div>
+          </div>
+        </form>
+      </div>
+      <div class="section-title"><h2>Hoje</h2><span class="tiny muted" id="healthTodayLabel"></span></div>
+      <div class="health-grid">
+        <div class="health-tile">💧<b id="todayWater">0 ml</b><span class="tiny muted">Meta sugerida: 2.000 ml</span></div>
+        <div class="health-tile">😴<b id="todaySleep">0 h</b><span class="tiny muted">Faixa de referência: 7–9 h</span></div>
+        <div class="health-tile">🏃<b id="todayExercise">0 min</b><span class="tiny muted">Meta diária: 30 min</span></div>
+        <div class="health-tile">🙂<b id="todayMood">—</b><span class="tiny muted">Humor</span></div>
+        <div class="health-tile">🧠<b id="todayStress">—</b><span class="tiny muted">Estresse</span></div>
+        <div class="health-tile">🛡️<b id="todayImpulse">—</b><span class="tiny muted">Controle de impulso</span></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Histórico de saúde</h2>
+        <div class="list" id="healthHistory"></div>
+        <p class="notice">Este recurso é apenas para organização pessoal e não substitui avaliação médica ou psicológica.</p>
+      </div>
+    </section>
+
+    <section class="view" id="view-assistant">
+      <div class="section-title" style="margin-top:0"><h2>Dicas inteligentes</h2><span class="tiny muted">Geradas localmente com seus dados</span></div>
+      <div class="card">
+        <div id="assistantTips"></div>
+        <button class="btn secondary" style="width:100%;margin-top:9px" onclick="renderAssistant()">Atualizar análise</button>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Checklist semanal</h2>
+        <div class="list">
+          <label class="check-row"><input type="checkbox" class="weeklyCheck"> Conferir faturas e contas programadas</label>
+          <label class="check-row"><input type="checkbox" class="weeklyCheck"> Revisar gastos supérfluos</label>
+          <label class="check-row"><input type="checkbox" class="weeklyCheck"> Fazer ou programar o aporte mensal</label>
+          <label class="check-row"><input type="checkbox" class="weeklyCheck"> Planejar alimentação e exercícios da semana</label>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-data">
+      <div class="section-title" style="margin-top:0"><h2>Dados e segurança</h2><span class="tiny muted">Tudo funciona offline</span></div>
+      <div class="card">
+        <h2>Backup e transferência</h2>
+        <p class="notice">Os dados são salvos automaticamente neste navegador. Para levar o aplicativo com os registros para outro aparelho, use “Baixar HTML atualizado” ou exporte um backup JSON.</p>
+        <div class="actions">
+          <button class="btn" onclick="downloadUpdatedHTML()">Baixar HTML atualizado</button>
+          <button class="btn secondary" onclick="exportJSON()">Exportar JSON</button>
+          <button class="btn secondary" onclick="document.getElementById('importFile').click()">Importar JSON</button>
+          <input type="file" id="importFile" accept="application/json" hidden>
+          <button class="btn secondary" onclick="exportCSV()">Exportar CSV</button>
+          <button class="btn secondary" onclick="window.print()">Imprimir relatório</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Configurações</h2>
+        <div class="settings-grid">
+          <div><label>Nome do aplicativo</label><input id="settingsName"></div>
+          <div><label>Saldo inicial</label><input type="number" id="settingsInitial" step="0.01"></div>
+          <div><label>Limite mensal geral</label><input type="number" id="settingsLimit" step="0.01"></div>
+          <button class="btn" onclick="saveSettings()">Salvar configurações</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>Zona de segurança</h2>
+        <p class="notice">A exclusão é permanente no navegador atual. Exporte um backup antes de apagar.</p>
+        <button class="btn danger" onclick="resetAll()">Apagar todos os dados</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-view="home"><span>⌂</span>Resumo</button>
+  <button class="nav-btn" data-view="transactions"><span>↕</span>Registros</button>
+  <button class="nav-btn" data-view="planner"><span>◎</span>Metas</button>
+  <button class="nav-btn" data-view="health"><span>♥</span>Saúde</button>
+  <button class="nav-btn" data-view="assistant"><span>✦</span>Dicas</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal" id="transactionModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2 id="transactionModalTitle">Novo lançamento</h2><button class="close" onclick="closeModal('transactionModal')">✕</button></div>
+    <form id="transactionForm">
+      <input type="hidden" id="editTransactionId">
+      <div class="quick-types">
+        <button type="button" class="quick-type active" data-value="expense">Gasto</button>
+        <button type="button" class="quick-type" data-value="income">Entrada</button>
+        <button type="button" class="quick-type" data-value="investment">Investimento</button>
+      </div>
+      <input type="hidden" id="transactionType" value="expense">
+      <div class="form-grid">
+        <div><label>Descrição</label><input id="transactionDescription" required placeholder="Ex.: mercado, salário, aporte XP"></div>
+        <div><label>Valor</label><input type="number" id="transactionAmount" min="0.01" step="0.01" required placeholder="R$ 0,00"></div>
+        <div><label>Data</label><input type="date" id="transactionDate" required></div>
+        <div><label>Categoria</label><input id="transactionCategory" list="categoryOptions" required placeholder="Selecione ou digite"></div>
+        <div><label>Conta / cartão</label><input id="transactionAccount" list="accountOptions" placeholder="Ex.: C6, dinheiro, XP"></div>
+        <div><label>Situação</label><select id="transactionStatus"><option value="paid">Realizado</option><option value="planned">Planejado</option></select></div>
+        <div class="field full"><label>Observação</label><textarea id="transactionNote" placeholder="Opcional"></textarea></div>
+        <div class="field full"><button class="btn" type="submit" style="width:100%">Salvar lançamento</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="goalModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2>Meta financeira</h2><button class="close" onclick="closeModal('goalModal')">✕</button></div>
+    <form id="goalForm">
+      <input type="hidden" id="editGoalId">
+      <div class="form-grid">
+        <div class="field full"><label>Nome da meta</label><input id="goalName" required placeholder="Ex.: reserva de emergência"></div>
+        <div><label>Valor-alvo</label><input type="number" id="goalTarget" min="0.01" step="0.01" required></div>
+        <div><label>Valor já acumulado</label><input type="number" id="goalCurrent" min="0" step="0.01" value="0"></div>
+        <div><label>Prazo</label><input type="date" id="goalDeadline"></div>
+        <div><label>Aporte mensal planejado</label><input type="number" id="goalMonthly" min="0" step="0.01" value="0"></div>
+        <div class="field full"><button class="btn" type="submit" style="width:100%">Salvar meta</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="budgetModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2>Limites por categoria</h2><button class="close" onclick="closeModal('budgetModal')">✕</button></div>
+    <p class="notice">Defina quanto pretende gastar por mês em cada categoria. Deixe em branco para remover o limite.</p>
+    <div id="budgetInputs" class="settings-grid"></div>
+    <button class="btn" style="width:100%;margin-top:14px" onclick="saveCategoryBudgets()">Salvar limites</button>
+  </div>
+</div>
+
+
+<div class="modal" id="recurringModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2>Conta recorrente</h2><button class="close" onclick="closeModal('recurringModal')">✕</button></div>
+    <form id="recurringForm">
+      <input type="hidden" id="editRecurringId">
+      <div class="form-grid">
+        <div class="field full"><label>Descrição</label><input id="recurringDescription" required placeholder="Ex.: aluguel, salário, internet"></div>
+        <div><label>Tipo</label><select id="recurringType"><option value="expense">Gasto</option><option value="income">Entrada</option><option value="investment">Investimento</option></select></div>
+        <div><label>Valor</label><input type="number" id="recurringAmount" min="0.01" step="0.01" required></div>
+        <div><label>Dia do mês</label><input type="number" id="recurringDay" min="1" max="31" value="1" required></div>
+        <div><label>Categoria</label><input id="recurringCategory" list="categoryOptions" required placeholder="Categoria"></div>
+        <div><label>Conta / cartão</label><input id="recurringAccount" list="accountOptions"></div>
+        <div class="field full"><button class="btn" type="submit" style="width:100%">Salvar recorrência</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="installmentModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2>Compra parcelada</h2><button class="close" onclick="closeModal('installmentModal')">✕</button></div>
+    <form id="installmentForm">
+      <input type="hidden" id="editInstallmentId">
+      <div class="form-grid">
+        <div class="field full"><label>Descrição</label><input id="installmentDescription" required placeholder="Ex.: notebook, celular, móveis"></div>
+        <div><label>Valor da parcela</label><input type="number" id="installmentAmount" min="0.01" step="0.01" required></div>
+        <div><label>Total de parcelas</label><input type="number" id="installmentTotal" min="1" step="1" value="1" required></div>
+        <div><label>Primeira parcela</label><input type="month" id="installmentStart" required></div>
+        <div><label>Categoria</label><input id="installmentCategory" list="categoryOptions" value="Compras" required></div>
+        <div><label>Conta / cartão</label><input id="installmentAccount" list="accountOptions"></div>
+        <div class="field full"><button class="btn" type="submit" style="width:100%">Salvar parcelamento</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2>Configuração rápida</h2><button class="close" onclick="closeModal('settingsModal')">✕</button></div>
+    <div class="settings-grid">
+      <div><label>Saldo inicial</label><input type="number" id="quickInitial" step="0.01"></div>
+      <div><label>Meta mensal de gastos</label><input type="number" id="quickLimit" step="0.01"></div>
+      <button class="btn" onclick="saveQuickSettings()">Salvar</button>
+      <button class="btn secondary" onclick="showView('data');closeModal('settingsModal')">Abrir dados e segurança</button>
+    </div>
+  </div>
+</div>
+
+<datalist id="categoryOptions">
+  <option value="Alimentação"><option value="Moradia"><option value="Transporte"><option value="Combustível">
+  <option value="Saúde"><option value="Farmácia"><option value="Internet"><option value="Cartões">
+  <option value="Compras"><option value="Lazer"><option value="Educação"><option value="Serviços">
+  <option value="Investimentos"><option value="Salário"><option value="Renda extra"><option value="Outros">
+</datalist>
+<datalist id="accountOptions">
+  <option value="Dinheiro"><option value="Banrisul"><option value="C6"><option value="Bradesco">
+  <option value="Itaú"><option value="Carrefour"><option value="Banricompras"><option value="99Pay">
+  <option value="Mercado Pago"><option value="XP"><option value="Bipa">
+</datalist>
+
+<script id="embedded-data" type="application/json">
+{
+  "version": 2.1,
+  "settings": {
+    "appName": "Meu Financeiro",
+    "initialBalance": 0,
+    "monthlyLimit": 2500,
+    "theme": "light"
+  },
+  "transactions": [],
+  "goals": [],
+  "recurring": [],
+  "installments": [],
+  "categoryBudgets": {
+    "Alimentação": 0,
+    "Transporte": 0,
+    "Moradia": 0,
+    "Saúde": 0,
+    "Lazer": 0,
+    "Compras": 0
+  },
+  "health": {},
+  "weeklyChecks": [false,false,false,false]
+}
+</script>
+
+<script>
+"use strict";
+const STORAGE_KEY="meu_financeiro_saude_v2";
+const CATEGORIES=["Alimentação","Moradia","Transporte","Combustível","Saúde","Farmácia","Internet","Cartões","Compras","Lazer","Educação","Serviços","Investimentos","Salário","Renda extra","Outros"];
+const TYPE_LABEL={expense:"Gasto",income:"Entrada",investment:"Investimento"};
+const TYPE_ICON={expense:"−",income:"+",investment:"↗"};
+const TYPE_COLOR={expense:"bad",income:"good",investment:""};
+let activeTypeFilter="all";
+let state=loadState();
+
+function deepCopy(o){return JSON.parse(JSON.stringify(o))}
+function initialState(){
+  try{return JSON.parse(document.getElementById("embedded-data").textContent)}
+  catch(e){return {version:2.1,settings:{appName:"Meu Financeiro",initialBalance:0,monthlyLimit:2500,theme:"light"},transactions:[],goals:[],recurring:[],installments:[],categoryBudgets:{},health:{},weeklyChecks:[false,false,false,false]}}
+}
+function normalizeState(s){
+  const base=initialState();
+  s=s&&typeof s==="object"?s:{};
+  return {
+    version:2.1,
+    settings:{...base.settings,...(s.settings||{})},
+    transactions:Array.isArray(s.transactions)?s.transactions:[],
+    goals:Array.isArray(s.goals)?s.goals:[],
+    recurring:Array.isArray(s.recurring)?s.recurring:[],
+    installments:Array.isArray(s.installments)?s.installments:[],
+    categoryBudgets:{...base.categoryBudgets,...(s.categoryBudgets||{})},
+    health:s.health&&typeof s.health==="object"?s.health:{},
+    weeklyChecks:Array.isArray(s.weeklyChecks)?s.weeklyChecks:base.weeklyChecks
+  };
+}
+function loadState(){
+  try{
+    const local=localStorage.getItem(STORAGE_KEY);
+    return normalizeState(local?JSON.parse(local):initialState());
+  }catch(e){return normalizeState(initialState())}
+}
+function saveState(message){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  renderAll();
+  if(message)showToast(message);
+}
+function money(v){return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function num(v){const n=Number(v);return Number.isFinite(n)?n:0}
+function todayISO(){return new Date().toISOString().slice(0,10)}
+function monthISO(date=todayISO()){return String(date).slice(0,7)}
+function formatDate(d){if(!d)return "—";const [y,m,day]=d.split("-");return `${day}/${m}/${y}`}
+function escapeHTML(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
+function uid(){return Date.now()+Math.floor(Math.random()*1000)}
+function clamp(v,min,max){return Math.min(max,Math.max(min,v))}
+function showToast(text){
+  const t=document.getElementById("toast");t.textContent=text;t.classList.add("show");
+  clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),2300)
+}
+function openModal(id){document.getElementById(id).classList.add("open")}
+function closeModal(id){document.getElementById(id).classList.remove("open")}
+
+function realizedTransactions(){return state.transactions.filter(t=>t.status!=="planned")}
+function totalsForMonth(month){
+  const tx=state.transactions.filter(t=>monthISO(t.date)===month&&t.status!=="planned");
+  return tx.reduce((a,t)=>{a[t.type]=(a[t.type]||0)+num(t.amount);return a},{expense:0,income:0,investment:0});
+}
+function totalByType(type,statusNotPlanned=true){
+  return state.transactions.filter(t=>t.type===type&&(!statusNotPlanned||t.status!=="planned")).reduce((a,t)=>a+num(t.amount),0)
+}
+function cashBalance(){
+  return num(state.settings.initialBalance)+totalByType("income")-totalByType("expense")-totalByType("investment")
+}
+function netWorth(){
+  return cashBalance()+totalByType("investment")
+}
+function projectedBalance(){
+  const planned=state.transactions.filter(t=>t.status==="planned").reduce((a,t)=>{
+    if(t.type==="income")return a+num(t.amount);
+    return a-num(t.amount);
+  },0);
+  return cashBalance()+planned
+}
+
+function renderAll(){
+  applyTheme();
+  renderHome();
+  renderTransactions();
+  renderPlanner();
+  renderHealth();
+  renderAssistant();
+  renderSettings();
+}
+function applyTheme(){
+  document.documentElement.dataset.theme=state.settings.theme||"light";
+  document.querySelector('meta[name="theme-color"]').setAttribute("content",state.settings.theme==="dark"?"#0b1220":"#0f9f91");
+  document.getElementById("appTitle").textContent=state.settings.appName||"Meu Financeiro";
+}
+function showView(name){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.view===name));
+  const target=document.getElementById("view-"+name);
+  if(target)target.classList.add("active");
+  if(name==="data")document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function renderHome(){
+  const m=monthISO(),tot=totalsForMonth(m),limit=num(state.settings.monthlyLimit),spent=tot.expense;
+  const balance=cashBalance();
+  document.getElementById("homeBalance").textContent=money(balance);
+  document.getElementById("homeBalance").className="hero-balance "+(balance<0?"bad":"");
+  document.getElementById("homeIncome").textContent=money(tot.income);
+  document.getElementById("homeExpense").textContent=money(tot.expense);
+  document.getElementById("homeInvest").textContent=money(tot.investment);
+  const pct=limit>0?spent/limit*100:0;
+  document.getElementById("budgetPct").textContent=Math.round(pct)+"%";
+  document.getElementById("budgetText").textContent=`${money(spent)} de ${money(limit)}`;
+  const bar=document.getElementById("budgetBar");
+  bar.style.width=clamp(pct,0,100)+"%";
+  bar.className=pct>=100?"danger":pct>=80?"warning":"";
+  const remaining=limit-spent;
+  document.getElementById("budgetHint").textContent=remaining>=0?`Ainda pode gastar ${money(remaining)} dentro da meta.`:`Meta excedida em ${money(Math.abs(remaining))}.`;
+  document.getElementById("budgetHint").className="tiny "+(remaining>=0?"muted":"bad");
+  document.getElementById("netWorth").textContent=money(netWorth());
+  const proj=projectedBalance();document.getElementById("projectedBalance").textContent=money(proj);
+  document.getElementById("projectedBalance").className="value "+(proj<0?"bad":"");
+  const savings=tot.income>0?((tot.income-tot.expense)/tot.income)*100:0;
+  document.getElementById("savingRate").textContent=(tot.income?Math.round(savings):0)+"%";
+  document.getElementById("savingRate").className="value "+(savings<0?"bad":savings>=20?"good":"");
+  document.getElementById("noImpulseStreak").textContent=calculateNoImpulseStreak();
+
+  const fScore=financialScore(tot,limit);
+  setRing("financeRing","financeScore",fScore);
+  document.getElementById("financeScoreText").textContent=financialScoreText(fScore);
+  const hScore=personalHealthScore(state.health[todayISO()]);
+  setRing("healthRing","healthScore",hScore);
+  document.getElementById("healthScoreText").textContent=healthScoreText(hScore);
+
+  const recent=[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id).slice(0,5);
+  document.getElementById("recentList").innerHTML=recent.length?recent.map(transactionItemHTML).join(""):'<div class="card empty">Nenhum lançamento ainda. Toque em “Registros” para começar.</div>';
+}
+function setRing(ringId,textId,score){
+  const ring=document.getElementById(ringId);ring.style.setProperty("--p",score);document.getElementById(textId).textContent=score;
+}
+function financialScore(tot,limit){
+  let score=50;
+  if(tot.income>0){
+    const saving=(tot.income-tot.expense)/tot.income;
+    score+=saving>=.2?25:saving>=.1?15:saving>=0?7:-20;
+  }
+  if(limit>0){
+    const use=tot.expense/limit;
+    score+=use<=.8?15:use<=1?5:-20;
+  }
+  if(state.goals.length)score+=10;
+  if(projectedBalance()<0)score-=15;
+  return Math.round(clamp(score,0,100));
+}
+function financialScoreText(s){
+  return s>=80?"Ótimo controle. Mantenha a constância.":s>=60?"Situação boa, com pontos para ajustar.":s>=40?"Atenção ao orçamento e à poupança.":"Risco elevado: reduza gastos e reveja pendências.";
+}
+function personalHealthScore(log){
+  if(!log)return 0;
+  let points=0,items=0;
+  if(log.waterMl!==""&&log.waterMl!=null){items++;points+=clamp(num(log.waterMl)/2000,0,1)*100}
+  if(log.sleepHours!==""&&log.sleepHours!=null){items++;const h=num(log.sleepHours);points+=h>=7&&h<=9?100:h>=6&&h<=10?70:35}
+  if(log.exerciseMin!==""&&log.exerciseMin!=null){items++;points+=clamp(num(log.exerciseMin)/30,0,1)*100}
+  if(log.mood){items++;points+=(num(log.mood)/5)*100}
+  if(log.stress){items++;points+=((6-num(log.stress))/5)*100}
+  return items?Math.round(points/items):0
+}
+function healthScoreText(s){
+  return !s?"Registre seus dados de hoje.":s>=80?"Seu dia está muito equilibrado.":s>=60?"Bom progresso; cuide do ponto mais baixo.":s>=40?"Seu corpo pede mais atenção hoje.":"Priorize descanso, hidratação e apoio adequado.";
+}
+function calculateNoImpulseStreak(){
+  const dates=Object.keys(state.health).sort().reverse();let streak=0;let d=new Date(todayISO()+"T12:00:00");
+  for(let i=0;i<366;i++){
+    const iso=d.toISOString().slice(0,10),log=state.health[iso];
+    if(log&&log.noImpulse){streak++;d.setDate(d.getDate()-1)}
+    else break;
+  }
+  return streak
+}
+
+function renderTransactions(){
+  if(!document.getElementById("transactionMonth").value)document.getElementById("transactionMonth").value=monthISO();
+  const month=document.getElementById("transactionMonth").value;
+  const q=document.getElementById("transactionSearch").value.trim().toLowerCase();
+  let list=[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  if(month)list=list.filter(t=>monthISO(t.date)===month);
+  if(activeTypeFilter==="planned")list=list.filter(t=>t.status==="planned");
+  else if(activeTypeFilter!=="all")list=list.filter(t=>t.type===activeTypeFilter&&t.status!=="planned");
+  if(q)list=list.filter(t=>[t.description,t.category,t.account,t.note].some(v=>String(v||"").toLowerCase().includes(q)));
+  const signed=list.reduce((a,t)=>a+(t.type==="income"?num(t.amount):-num(t.amount)),0);
+  document.getElementById("filteredTotal").textContent=money(signed);
+  document.getElementById("filteredTotal").className=signed<0?"bad":"good";
+  document.getElementById("transactionList").innerHTML=list.length?list.map(transactionItemHTML).join(""):'<div class="empty">Nenhum registro encontrado.</div>';
+  document.querySelectorAll("#typeFilters .chip").forEach(b=>{
+    b.style.borderColor=b.dataset.type===activeTypeFilter?"var(--primary)":"var(--line)";
+    b.style.color=b.dataset.type===activeTypeFilter?"var(--primary)":"var(--text)";
+  });
+}
+function transactionItemHTML(t){
+  const planned=t.status==="planned";
+  const sign=t.type==="income"?"+":"−";
+  return `<div class="item">
+    <div class="item-icon">${TYPE_ICON[t.type]||"•"}</div>
+    <div><div class="item-title">${escapeHTML(t.description)}</div>
+      <div class="item-sub">${formatDate(t.date)} · ${escapeHTML(t.category||"Sem categoria")}${t.account?" · "+escapeHTML(t.account):""}${planned?" · Planejado":""}</div>
+    </div>
+    <div class="right"><div class="item-value ${TYPE_COLOR[t.type]||""}">${sign} ${money(t.amount)}</div>
+      <div class="item-actions"><button class="link-btn" onclick="editTransaction(${t.id})">Editar</button><button class="link-btn" onclick="deleteTransaction(${t.id})">Excluir</button></div>
+    </div></div>`;
+}
+function openTransactionModal(mode){
+  document.getElementById("transactionForm").reset();
+  document.getElementById("editTransactionId").value="";
+  document.getElementById("transactionDate").value=todayISO();
+  document.getElementById("transactionStatus").value=mode==="planned"?"planned":"paid";
+  setTransactionType("expense");
+  document.getElementById("transactionModalTitle").textContent="Novo lançamento";
+  openModal("transactionModal")
+}
+function setTransactionType(type){
+  document.getElementById("transactionType").value=type;
+  document.querySelectorAll(".quick-type").forEach(b=>b.classList.toggle("active",b.dataset.value===type));
+}
+function editTransaction(id){
+  const t=state.transactions.find(x=>x.id===id);if(!t)return;
+  document.getElementById("editTransactionId").value=id;
+  document.getElementById("transactionDescription").value=t.description||"";
+  document.getElementById("transactionAmount").value=t.amount||"";
+  document.getElementById("transactionDate").value=t.date||todayISO();
+  document.getElementById("transactionCategory").value=t.category||"";
+  document.getElementById("transactionAccount").value=t.account||"";
+  document.getElementById("transactionStatus").value=t.status||"paid";
+  document.getElementById("transactionNote").value=t.note||"";
+  setTransactionType(t.type||"expense");
+  document.getElementById("transactionModalTitle").textContent="Editar lançamento";
+  openModal("transactionModal")
+}
+function deleteTransaction(id){
+  if(confirm("Excluir este lançamento?")){state.transactions=state.transactions.filter(t=>t.id!==id);saveState("Lançamento excluído.")}
+}
+
+function renderPlanner(){
+  document.getElementById("goalsList").innerHTML=state.goals.length?state.goals.map(g=>{
+    const pct=g.target>0?clamp(num(g.current)/num(g.target)*100,0,100):0;
+    let projection="";
+    const remain=Math.max(0,num(g.target)-num(g.current));
+    if(num(g.monthly)>0)projection=` · cerca de ${Math.ceil(remain/num(g.monthly))} meses no aporte atual`;
+    return `<div class="goal"><div class="row-between"><h4>${escapeHTML(g.name)}</h4><span class="tiny">${Math.round(pct)}%</span></div>
+      <div class="meta">${money(g.current)} de ${money(g.target)}${g.deadline?" · até "+formatDate(g.deadline):""}${projection}</div>
+      <div class="progress"><span style="width:${pct}%"></span></div>
+      <div class="item-actions"><button class="link-btn" onclick="editGoal(${g.id})">Editar</button><button class="link-btn" onclick="deleteGoal(${g.id})">Excluir</button></div></div>`;
+  }).join(""):'<div class="empty">Crie metas para reserva, veículo, viagem ou aposentadoria.</div>';
+
+  const month=monthISO(),catSpending=categoryTotals(month);
+  const configured=Object.entries(state.categoryBudgets).filter(([,v])=>num(v)>0);
+  document.getElementById("categoryBudgetList").innerHTML=configured.length?configured.map(([cat,limit])=>{
+    const spent=num(catSpending[cat]),pct=limit>0?spent/limit*100:0;
+    return `<div class="category-row"><div class="top"><span>${escapeHTML(cat)}</span><b class="${pct>100?"bad":""}">${money(spent)} / ${money(limit)}</b></div>
+      <div class="progress"><span class="${pct>=100?"danger":pct>=80?"warning":""}" style="width:${clamp(pct,0,100)}%"></span></div></div>`;
+  }).join(""):'<div class="empty">Nenhum limite por categoria definido.</div>';
+
+  const planned=[...state.transactions].filter(t=>t.status==="planned").sort((a,b)=>a.date.localeCompare(b.date));
+  document.getElementById("plannedList").innerHTML=planned.length?planned.map(transactionItemHTML).join(""):'<div class="empty">Nenhuma conta programada.</div>';
+  renderCategorySummary(catSpending);
+  renderRecurring();
+  renderInstallments();
+}
+
+function monthAdd(month,add){
+  const [y,m]=month.split("-").map(Number);const d=new Date(y,m-1+add,1);return d.toISOString().slice(0,7)
+}
+function monthDiff(start,end){
+  const [sy,sm]=start.split("-").map(Number),[ey,em]=end.split("-").map(Number);return (ey-sy)*12+(em-sm)
+}
+function dateFromMonthDay(month,day){
+  const [y,m]=month.split("-").map(Number);const last=new Date(y,m,0).getDate();return `${month}-${String(clamp(num(day)||1,1,last)).padStart(2,"0")}`
+}
+function plannedExists(source,id,month){return state.transactions.some(t=>t.source===source&&t.sourceId===id&&monthISO(t.date)===month)}
+function recurringItemHTML(r){
+  return `<div class="item"><div class="item-icon">↻</div><div><div class="item-title">${escapeHTML(r.description)}</div><div class="item-sub">Dia ${r.day} · ${TYPE_LABEL[r.type]||r.type} · ${escapeHTML(r.category||"Outros")} ${r.account?"· "+escapeHTML(r.account):""}</div></div><div class="right"><div class="item-value ${TYPE_COLOR[r.type]||""}">${r.type==="income"?"+":"−"} ${money(r.amount)}</div><div class="item-actions"><button class="link-btn" onclick="editRecurring(${r.id})">Editar</button><button class="link-btn" onclick="deleteRecurring(${r.id})">Excluir</button></div></div></div>`
+}
+function installmentItemHTML(i){
+  const current=clamp(monthDiff(i.startMonth,monthISO())+1,0,num(i.total));
+  const remaining=Math.max(0,num(i.total)-current+1);
+  return `<div class="item"><div class="item-icon">▦</div><div><div class="item-title">${escapeHTML(i.description)}</div><div class="item-sub"><span class="badge">${current||0}/${i.total}</span> · início ${i.startMonth} · ${escapeHTML(i.category||"Compras")}</div></div><div class="right"><div class="item-value bad">− ${money(i.amount)}</div><div class="tiny muted">restante: ${money(remaining*num(i.amount))}</div><div class="item-actions"><button class="link-btn" onclick="editInstallment(${i.id})">Editar</button><button class="link-btn" onclick="deleteInstallment(${i.id})">Excluir</button></div></div></div>`
+}
+function renderRecurring(){
+  const el=document.getElementById("recurringList");if(!el)return;
+  el.innerHTML=state.recurring.length?state.recurring.map(recurringItemHTML).join(""):'<div class="empty">Nenhuma recorrência cadastrada.</div>'
+}
+function renderInstallments(){
+  const el=document.getElementById("installmentList");if(!el)return;
+  el.innerHTML=state.installments.length?state.installments.map(installmentItemHTML).join(""):'<div class="empty">Nenhum parcelamento cadastrado.</div>'
+}
+function openRecurringModal(){
+  document.getElementById("recurringForm").reset();document.getElementById("editRecurringId").value="";document.getElementById("recurringDay").value=new Date().getDate();openModal("recurringModal")
+}
+function editRecurring(id){const r=state.recurring.find(x=>x.id===id);if(!r)return;document.getElementById("editRecurringId").value=id;document.getElementById("recurringDescription").value=r.description;document.getElementById("recurringType").value=r.type;document.getElementById("recurringAmount").value=r.amount;document.getElementById("recurringDay").value=r.day;document.getElementById("recurringCategory").value=r.category||"";document.getElementById("recurringAccount").value=r.account||"";openModal("recurringModal")}
+function deleteRecurring(id){if(confirm("Excluir esta recorrência?")){state.recurring=state.recurring.filter(r=>r.id!==id);saveState("Recorrência excluída.")}}
+function generateRecurringForMonth(){
+  const month=monthISO();let added=0;
+  state.recurring.forEach(r=>{if(plannedExists("recurring",r.id,month))return;state.transactions.push({id:uid()+added,type:r.type,description:r.description,amount:num(r.amount),date:dateFromMonthDay(month,r.day),category:r.category||"Outros",account:r.account||"",status:"planned",note:"Gerado automaticamente pela recorrência.",source:"recurring",sourceId:r.id});added++});
+  saveState(added?`${added} lançamento(s) recorrente(s) gerado(s).`:"Nada novo para gerar neste mês.")
+}
+function openInstallmentModal(){document.getElementById("installmentForm").reset();document.getElementById("editInstallmentId").value="";document.getElementById("installmentStart").value=monthISO();document.getElementById("installmentCategory").value="Compras";openModal("installmentModal")}
+function editInstallment(id){const i=state.installments.find(x=>x.id===id);if(!i)return;document.getElementById("editInstallmentId").value=id;document.getElementById("installmentDescription").value=i.description;document.getElementById("installmentAmount").value=i.amount;document.getElementById("installmentTotal").value=i.total;document.getElementById("installmentStart").value=i.startMonth;document.getElementById("installmentCategory").value=i.category||"Compras";document.getElementById("installmentAccount").value=i.account||"";openModal("installmentModal")}
+function deleteInstallment(id){if(confirm("Excluir este parcelamento?")){state.installments=state.installments.filter(i=>i.id!==id);saveState("Parcelamento excluído.")}}
+function generateInstallmentsForMonth(){
+  const month=monthISO();let added=0;
+  state.installments.forEach(i=>{const idx=monthDiff(i.startMonth,month)+1;if(idx<1||idx>num(i.total)||plannedExists("installment",i.id,month))return;state.transactions.push({id:uid()+added,type:"expense",description:`${i.description} (${idx}/${i.total})`,amount:num(i.amount),date:dateFromMonthDay(month,5),category:i.category||"Compras",account:i.account||"",status:"planned",note:"Gerado automaticamente pelo parcelamento.",source:"installment",sourceId:i.id});added++});
+  saveState(added?`${added} parcela(s) gerada(s) para o mês atual.`:"Nada novo para gerar neste mês.")
+}
+
+function categoryTotals(month){
+  const out={};
+  state.transactions.filter(t=>t.status!=="planned"&&t.type==="expense"&&monthISO(t.date)===month).forEach(t=>out[t.category||"Outros"]=(out[t.category||"Outros"]||0)+num(t.amount));
+  return out
+}
+function renderCategorySummary(data){
+  const entries=Object.entries(data).sort((a,b)=>b[1]-a[1]),total=entries.reduce((a,[,v])=>a+v,0);
+  const palette=["#0f9f91","#3b82f6","#8b5cf6","#e9a11b","#eb3b5a","#12a36d","#64748b","#f97316"];
+  let acc=0,stops=[];
+  entries.forEach(([,v],i)=>{const start=total?acc/total*100:0;acc+=v;const end=total?acc/total*100:100;stops.push(`${palette[i%palette.length]} ${start}% ${end}%`)});
+  document.getElementById("categoryPie").style.background=entries.length?`conic-gradient(${stops.join(",")})`:"conic-gradient(var(--surface2) 0 100%)";
+  document.getElementById("categorySummary").innerHTML=entries.length?entries.map(([cat,v],i)=>`<div class="category-row"><div class="top"><span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${palette[i%palette.length]};margin-right:7px"></i>${escapeHTML(cat)}</span><b>${money(v)} · ${total?Math.round(v/total*100):0}%</b></div><div class="progress"><span style="width:${total?v/total*100:0}%;background:${palette[i%palette.length]}"></span></div></div>`).join(""):'<div class="empty">Ainda não há gastos no mês atual.</div>';
+}
+function openGoalModal(){
+  document.getElementById("goalForm").reset();document.getElementById("editGoalId").value="";document.getElementById("goalCurrent").value=0;document.getElementById("goalMonthly").value=0;openModal("goalModal")
+}
+function editGoal(id){
+  const g=state.goals.find(x=>x.id===id);if(!g)return;
+  document.getElementById("editGoalId").value=id;document.getElementById("goalName").value=g.name;document.getElementById("goalTarget").value=g.target;document.getElementById("goalCurrent").value=g.current;document.getElementById("goalDeadline").value=g.deadline||"";document.getElementById("goalMonthly").value=g.monthly||0;openModal("goalModal")
+}
+function deleteGoal(id){if(confirm("Excluir esta meta?")){state.goals=state.goals.filter(g=>g.id!==id);saveState("Meta excluída.")}}
+function openBudgetModal(){
+  document.getElementById("budgetInputs").innerHTML=CATEGORIES.filter(c=>!["Salário","Renda extra","Investimentos"].includes(c)).map(c=>`<div><label>${escapeHTML(c)}</label><input type="number" min="0" step="0.01" data-category="${escapeHTML(c)}" value="${num(state.categoryBudgets[c])||""}" placeholder="Sem limite"></div>`).join("");
+  openModal("budgetModal")
+}
+function saveCategoryBudgets(){
+  document.querySelectorAll("#budgetInputs input").forEach(i=>state.categoryBudgets[i.dataset.category]=num(i.value));
+  closeModal("budgetModal");saveState("Limites por categoria atualizados.")
+}
+
+function renderHealth(){
+  const date=document.getElementById("healthDate").value||todayISO();
+  if(!document.getElementById("healthDate").value)document.getElementById("healthDate").value=date;
+  loadHealthForm(date);
+  const t=state.health[todayISO()]||{};
+  document.getElementById("healthTodayLabel").textContent=formatDate(todayISO());
+  document.getElementById("todayWater").textContent=`${num(t.waterMl)} ml`;
+  document.getElementById("todaySleep").textContent=`${num(t.sleepHours)} h`;
+  document.getElementById("todayExercise").textContent=`${num(t.exerciseMin)} min`;
+  document.getElementById("todayMood").textContent=t.mood?`${t.mood}/5`:"—";
+  document.getElementById("todayStress").textContent=t.stress?`${t.stress}/5`:"—";
+  document.getElementById("todayImpulse").textContent=t.noImpulse?"Cumprido":"—";
+  const entries=Object.entries(state.health).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,14);
+  document.getElementById("healthHistory").innerHTML=entries.length?entries.map(([d,h])=>`<div class="item">
+    <div class="item-icon">♥</div><div><div class="item-title">${formatDate(d)}</div>
+    <div class="item-sub">${num(h.waterMl)} ml · ${num(h.sleepHours)} h de sono · ${num(h.exerciseMin)} min de atividade${h.noImpulse?" · sem impulso":""}</div></div>
+    <div class="right"><b>${personalHealthScore(h)}</b><div class="tiny muted">pontos</div><button class="link-btn" onclick="deleteHealth('${d}')">Excluir</button></div></div>`).join(""):'<div class="empty">Nenhum registro de saúde ainda.</div>';
+}
+function loadHealthForm(date){
+  const h=state.health[date]||{};
+  document.getElementById("waterMl").value=h.waterMl??"";
+  document.getElementById("sleepHours").value=h.sleepHours??"";
+  document.getElementById("exerciseMin").value=h.exerciseMin??"";
+  document.getElementById("mood").value=h.mood??"";
+  document.getElementById("stress").value=h.stress??"";
+  document.getElementById("healthNote").value=h.note??"";
+  document.getElementById("noImpulse").checked=!!h.noImpulse
+}
+function deleteHealth(date){if(confirm("Excluir o registro desta data?")){delete state.health[date];saveState("Registro de saúde excluído.")}}
+
+function renderAssistant(){
+  const m=monthISO(),tot=totalsForMonth(m),limit=num(state.settings.monthlyLimit),tips=[];
+  if(!state.transactions.length)tips.push(["Comece pelo essencial","Registre todas as entradas e gastos durante sete dias. A qualidade das recomendações melhora conforme os dados ficam completos."]);
+  if(limit>0&&tot.expense>limit)tips.push(["Meta mensal excedida",`Os gastos ultrapassaram a meta em ${money(tot.expense-limit)}. Pause compras não essenciais e revise as três maiores categorias.`]);
+  else if(limit>0&&tot.expense/limit>=.8)tips.push(["Atenção ao limite",`Você já utilizou ${Math.round(tot.expense/limit*100)}% da meta mensal. Priorize apenas despesas necessárias até o próximo mês.`]);
+  else if(tot.expense>0)tips.push(["Orçamento sob controle",`Você ainda possui ${money(Math.max(0,limit-tot.expense))} dentro da meta mensal geral.`]);
+  if(tot.income>0){
+    const rate=(tot.income-tot.expense)/tot.income;
+    if(rate>=.2)tips.push(["Boa capacidade de poupança",`A sobra antes dos investimentos está em aproximadamente ${Math.round(rate*100)}% da renda do mês.`]);
+    else if(rate<0)tips.push(["Mês deficitário","Os gastos realizados superam as entradas do mês. Evite assumir novas parcelas até equilibrar o fluxo."]);
+    else tips.push(["Aumente a margem",`Sua sobra está em aproximadamente ${Math.round(rate*100)}%. Tente elevar gradualmente para 20%, sem comprometer despesas essenciais.`]);
+  }
+  const cats=Object.entries(categoryTotals(m)).sort((a,b)=>b[1]-a[1]);
+  if(cats.length)tips.push(["Maior categoria de gasto",`${cats[0][0]} representa ${money(cats[0][1])} no mês. Verifique se existe algum valor evitável ou negociável.`]);
+  const openInstallments=(state.installments||[]).reduce((a,i)=>{const current=clamp(monthDiff(i.startMonth,m)+1,0,num(i.total));return a+Math.max(0,num(i.total)-current+1)*num(i.amount)},0);
+  if(openInstallments>0)tips.push(["Parcelamentos em aberto",`O valor aproximado ainda comprometido em parcelas é ${money(openInstallments)}. Evite novas parcelas antes de conferir o saldo projetado.`]);
+  if((state.recurring||[]).length)tips.push(["Automação mensal",`Você tem ${state.recurring.length} recorrência(s) cadastrada(s). Gere o mês atual no Planejamento para não esquecer contas fixas.`]);
+  const plannedExpenses=state.transactions.filter(t=>t.status==="planned"&&t.type!=="income").reduce((a,t)=>a+num(t.amount),0);
+  if(plannedExpenses>0)tips.push(["Compromissos futuros",`Há ${money(plannedExpenses)} em gastos e investimentos planejados. O saldo projetado é ${money(projectedBalance())}.`]);
+  const h=state.health[todayISO()];
+  if(h){
+    if(num(h.sleepHours)>0&&num(h.sleepHours)<7)tips.push(["Sono e decisões","Uma noite curta pode reduzir atenção e autocontrole. Adie compras relevantes e decisões financeiras impulsivas quando estiver muito cansado."]);
+    if(num(h.exerciseMin)<30)tips.push(["Movimento diário",`Faltam ${Math.max(0,30-num(h.exerciseMin))} minutos para a meta de atividade física de hoje.`]);
+    if(num(h.waterMl)<2000)tips.push(["Hidratação",`Faltam ${Math.max(0,2000-num(h.waterMl))} ml para a referência diária definida no aplicativo.`]);
+  }else tips.push(["Cuide do corpo e do bolso","Registre o dia na área Saúde. Sono, estresse e impulsividade podem influenciar suas decisões de consumo."]);
+  if(!state.goals.length)tips.push(["Defina um destino","Crie ao menos uma meta financeira. Uma reserva de emergência costuma ser a primeira prioridade antes de objetivos de consumo."]);
+  document.getElementById("assistantTips").innerHTML=tips.map(t=>`<div class="tip"><b>${escapeHTML(t[0])}</b><div class="tiny muted" style="margin-top:4px">${escapeHTML(t[1])}</div></div>`).join("");
+}
+
+function renderSettings(){
+  document.getElementById("settingsName").value=state.settings.appName||"Meu Financeiro";
+  document.getElementById("settingsInitial").value=num(state.settings.initialBalance);
+  document.getElementById("settingsLimit").value=num(state.settings.monthlyLimit);
+  document.getElementById("quickInitial").value=num(state.settings.initialBalance);
+  document.getElementById("quickLimit").value=num(state.settings.monthlyLimit);
+  document.querySelectorAll(".weeklyCheck").forEach((c,i)=>c.checked=!!state.weeklyChecks[i])
+}
+function openSettings(){renderSettings();openModal("settingsModal")}
+function saveSettings(){
+  state.settings.appName=document.getElementById("settingsName").value.trim()||"Meu Financeiro";
+  state.settings.initialBalance=num(document.getElementById("settingsInitial").value);
+  state.settings.monthlyLimit=num(document.getElementById("settingsLimit").value)||2500;
+  saveState("Configurações salvas.")
+}
+function saveQuickSettings(){
+  state.settings.initialBalance=num(document.getElementById("quickInitial").value);
+  state.settings.monthlyLimit=num(document.getElementById("quickLimit").value)||2500;
+  closeModal("settingsModal");saveState("Configuração atualizada.")
+}
+
+function downloadFile(name,content,type){
+  const blob=new Blob([content],{type});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+}
+function exportJSON(){downloadFile("backup_meu_financeiro_saude.json",JSON.stringify(state,null,2),"application/json");showToast("Backup JSON criado.")}
+function exportCSV(){
+  const rows=[["Data","Tipo","Situação","Categoria","Descrição","Conta","Valor","Observação"]];
+  state.transactions.forEach(t=>rows.push([t.date,TYPE_LABEL[t.type]||t.type,t.status==="planned"?"Planejado":"Realizado",t.category,t.description,t.account||"",String(num(t.amount)).replace(".",","),t.note||""]));
+  const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(";")).join("\n");
+  downloadFile("lancamentos_financeiros.csv",csv,"text/csv;charset=utf-8");showToast("Arquivo CSV criado.")
+}
+function downloadUpdatedHTML(){
+  const clone=document.documentElement.cloneNode(true);
+  clone.querySelector("#embedded-data").textContent=JSON.stringify(state,null,2).replace(/<\/script/gi,"<\\/script");
+  clone.querySelectorAll(".modal").forEach(m=>m.classList.remove("open"));
+  const html="<!DOCTYPE html>\n"+clone.outerHTML;
+  downloadFile("meu_financeiro_saude_atualizado.html",html,"text/html;charset=utf-8");
+  showToast("HTML atualizado criado.")
+}
+function resetAll(){
+  if(!confirm("Apagar definitivamente todos os lançamentos, metas e registros de saúde deste navegador?"))return;
+  if(!confirm("Confirma a exclusão total? Esta ação não pode ser desfeita sem backup."))return;
+  state=normalizeState(initialState());localStorage.removeItem(STORAGE_KEY);saveState("Todos os dados foram apagados.")
+}
+
+document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+document.getElementById("themeBtn").addEventListener("click",()=>{state.settings.theme=state.settings.theme==="dark"?"light":"dark";saveState()});
+document.querySelectorAll(".quick-type").forEach(b=>b.addEventListener("click",()=>setTransactionType(b.dataset.value)));
+document.getElementById("transactionMonth").addEventListener("change",renderTransactions);
+document.getElementById("transactionSearch").addEventListener("input",renderTransactions);
+document.querySelectorAll("#typeFilters .chip").forEach(b=>b.addEventListener("click",()=>{activeTypeFilter=b.dataset.type;renderTransactions()}));
+document.getElementById("healthDate").addEventListener("change",e=>loadHealthForm(e.target.value));
+document.getElementById("importFile").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{
+    try{state=normalizeState(JSON.parse(r.result));saveState("Backup importado com sucesso.")}
+    catch(err){alert("O arquivo selecionado não é um backup válido.")}
+    e.target.value="";
+  };r.readAsText(f)
+});
+document.querySelectorAll(".weeklyCheck").forEach((c,i)=>c.addEventListener("change",()=>{state.weeklyChecks[i]=c.checked;localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}));
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("open")}));
+
+document.getElementById("transactionForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const id=num(document.getElementById("editTransactionId").value);
+  const record={
+    id:id||uid(),type:document.getElementById("transactionType").value,
+    description:document.getElementById("transactionDescription").value.trim(),
+    amount:num(document.getElementById("transactionAmount").value),
+    date:document.getElementById("transactionDate").value,
+    category:document.getElementById("transactionCategory").value.trim()||"Outros",
+    account:document.getElementById("transactionAccount").value.trim(),
+    status:document.getElementById("transactionStatus").value,
+    note:document.getElementById("transactionNote").value.trim()
+  };
+  if(!record.description||record.amount<=0||!record.date){alert("Preencha descrição, valor e data.");return}
+  const idx=state.transactions.findIndex(t=>t.id===id);
+  if(idx>=0)state.transactions[idx]=record;else state.transactions.push(record);
+  closeModal("transactionModal");saveState(idx>=0?"Lançamento atualizado.":"Lançamento adicionado.")
+});
+document.getElementById("goalForm").addEventListener("submit",e=>{
+  e.preventDefault();const id=num(document.getElementById("editGoalId").value);
+  const g={id:id||uid(),name:document.getElementById("goalName").value.trim(),target:num(document.getElementById("goalTarget").value),current:num(document.getElementById("goalCurrent").value),deadline:document.getElementById("goalDeadline").value,monthly:num(document.getElementById("goalMonthly").value)};
+  if(!g.name||g.target<=0){alert("Informe o nome e um valor-alvo válido.");return}
+  const idx=state.goals.findIndex(x=>x.id===id);if(idx>=0)state.goals[idx]=g;else state.goals.push(g);
+  closeModal("goalModal");saveState(idx>=0?"Meta atualizada.":"Meta criada.")
+});
+
+document.getElementById("recurringForm").addEventListener("submit",e=>{
+  e.preventDefault();const id=num(document.getElementById("editRecurringId").value);
+  const r={id:id||uid(),description:document.getElementById("recurringDescription").value.trim(),type:document.getElementById("recurringType").value,amount:num(document.getElementById("recurringAmount").value),day:clamp(num(document.getElementById("recurringDay").value),1,31),category:document.getElementById("recurringCategory").value.trim()||"Outros",account:document.getElementById("recurringAccount").value.trim()};
+  if(!r.description||r.amount<=0){alert("Preencha descrição e valor.");return}
+  const idx=state.recurring.findIndex(x=>x.id===id);if(idx>=0)state.recurring[idx]=r;else state.recurring.push(r);
+  closeModal("recurringModal");saveState(idx>=0?"Recorrência atualizada.":"Recorrência criada.")
+});
+document.getElementById("installmentForm").addEventListener("submit",e=>{
+  e.preventDefault();const id=num(document.getElementById("editInstallmentId").value);
+  const i={id:id||uid(),description:document.getElementById("installmentDescription").value.trim(),amount:num(document.getElementById("installmentAmount").value),total:Math.max(1,Math.round(num(document.getElementById("installmentTotal").value))),startMonth:document.getElementById("installmentStart").value||monthISO(),category:document.getElementById("installmentCategory").value.trim()||"Compras",account:document.getElementById("installmentAccount").value.trim()};
+  if(!i.description||i.amount<=0){alert("Preencha descrição e valor da parcela.");return}
+  const idx=state.installments.findIndex(x=>x.id===id);if(idx>=0)state.installments[idx]=i;else state.installments.push(i);
+  closeModal("installmentModal");saveState(idx>=0?"Parcelamento atualizado.":"Parcelamento criado.")
+});
+
+document.getElementById("healthForm").addEventListener("submit",e=>{
+  e.preventDefault();const date=document.getElementById("healthDate").value;
+  state.health[date]={waterMl:document.getElementById("waterMl").value===""?"":num(document.getElementById("waterMl").value),sleepHours:document.getElementById("sleepHours").value===""?"":num(document.getElementById("sleepHours").value),exerciseMin:document.getElementById("exerciseMin").value===""?"":num(document.getElementById("exerciseMin").value),mood:document.getElementById("mood").value,stress:document.getElementById("stress").value,note:document.getElementById("healthNote").value.trim(),noImpulse:document.getElementById("noImpulse").checked};
+  saveState("Registro diário salvo.")
+});
+
+document.getElementById("transactionDate").value=todayISO();
+document.getElementById("healthDate").value=todayISO();
+document.getElementById("transactionMonth").value=monthISO();
+renderAll();
+
+
+// Instalação como PWA e funcionamento offline.
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  if (installBtn) installBtn.style.display = "inline-flex";
+});
+if (installBtn) installBtn.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) {
+    showToast("Abra o menu do Chrome e toque em ‘Adicionar à tela inicial’.");
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBtn.style.display = "none";
+});
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  if (installBtn) installBtn.style.display = "none";
+  showToast("Aplicativo instalado com sucesso.");
+});
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

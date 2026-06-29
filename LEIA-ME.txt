@@ -1,0 +1,12 @@
+Meu Financeiro & Saúde - Versão 2.0 otimizada
+
+Arquivos preparados para substituir exatamente os arquivos existentes no repositório GitHub:
+- index.html
+- manifesto.webmanifesto
+- service-worker.js
+- ícone-192.png
+- ícone-512.png
+- ícone-mascarável-512.png
+
+Envie estes arquivos extraídos para o GitHub usando a opção Código > Carregar arquivos.
+Não envie o arquivo ZIP diretamente.
