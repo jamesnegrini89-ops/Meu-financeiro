@@ -1,11 +1,11 @@
-const CACHE_NAME = "meu-financeiro-pwa-v1";
+const CACHE_NAME = "meu-financeiro-pwa-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./manifest.webmanifest",
-  "./icon-192.png",
-  "./icon-512.png",
-  "./icon-maskable-512.png"
+  "./manifesto.webmanifesto",
+  "./ícone-192.png",
+  "./ícone-512.png",
+  "./ícone-mascarável-512.png"
 ];
 
 self.addEventListener("install", event => {

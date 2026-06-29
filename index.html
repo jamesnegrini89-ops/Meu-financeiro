@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f9f91">
-<title>Meu Financeiro & Saúde</title>
-<link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Meu Financeiro & Saúde 2.0</title>
+<link rel="manifest" href="./manifesto.webmanifesto">
+<link rel="icon" type="image/png" sizes="192x192" href="./ícone-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./ícone-512.png">
+<link rel="apple-touch-icon" href="./ícone-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -123,6 +123,7 @@ textarea{min-height:82px;resize:vertical}
 .empty{text-align:center;color:var(--muted);padding:24px 10px}
 .chips{display:flex;gap:7px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--surface2);border-radius:999px;padding:7px 10px;font-size:12px}
+.badge{display:inline-block;border-radius:999px;background:var(--surface2);border:1px solid var(--line);padding:4px 8px;font-size:11px;color:var(--muted)}
 .goal{padding:14px;border:1px solid var(--line);border-radius:17px;margin-top:10px}
 .goal h4{margin:0 0 5px}.goal .meta{font-size:12px;color:var(--muted);margin-bottom:9px}
 .health-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -294,6 +295,20 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
         <div class="row-between"><h2>Contas e entradas programadas</h2><button class="btn small secondary" onclick="openTransactionModal('planned')">Adicionar</button></div>
         <div class="list" id="plannedList"></div>
       </div>
+      <div class="grid two" style="margin-top:14px">
+        <div class="card">
+          <div class="row-between"><h2>Recorrências</h2><button class="btn small secondary" onclick="openRecurringModal()">+ Nova</button></div>
+          <p class="notice">Use para aluguel, internet, salário, assinaturas e outras contas mensais.</p>
+          <div class="actions" style="margin-bottom:10px"><button class="btn small" onclick="generateRecurringForMonth()">Gerar mês atual</button></div>
+          <div class="list" id="recurringList"></div>
+        </div>
+        <div class="card">
+          <div class="row-between"><h2>Parcelamentos</h2><button class="btn small secondary" onclick="openInstallmentModal()">+ Novo</button></div>
+          <p class="notice">Controle compras parceladas, parcelas restantes e valor total pendente.</p>
+          <div class="actions" style="margin-bottom:10px"><button class="btn small" onclick="generateInstallmentsForMonth()">Gerar mês atual</button></div>
+          <div class="list" id="installmentList"></div>
+        </div>
+      </div>
       <div class="card" style="margin-top:14px">
         <h2>Resumo por categoria</h2>
         <div class="pie" id="categoryPie"></div>
@@ -446,6 +461,43 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
   </div>
 </div>
 
+
+<div class="modal" id="recurringModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2>Conta recorrente</h2><button class="close" onclick="closeModal('recurringModal')">✕</button></div>
+    <form id="recurringForm">
+      <input type="hidden" id="editRecurringId">
+      <div class="form-grid">
+        <div class="field full"><label>Descrição</label><input id="recurringDescription" required placeholder="Ex.: aluguel, salário, internet"></div>
+        <div><label>Tipo</label><select id="recurringType"><option value="expense">Gasto</option><option value="income">Entrada</option><option value="investment">Investimento</option></select></div>
+        <div><label>Valor</label><input type="number" id="recurringAmount" min="0.01" step="0.01" required></div>
+        <div><label>Dia do mês</label><input type="number" id="recurringDay" min="1" max="31" value="1" required></div>
+        <div><label>Categoria</label><input id="recurringCategory" list="categoryOptions" required placeholder="Categoria"></div>
+        <div><label>Conta / cartão</label><input id="recurringAccount" list="accountOptions"></div>
+        <div class="field full"><button class="btn" type="submit" style="width:100%">Salvar recorrência</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" id="installmentModal">
+  <div class="modal-sheet">
+    <div class="modal-head"><h2>Compra parcelada</h2><button class="close" onclick="closeModal('installmentModal')">✕</button></div>
+    <form id="installmentForm">
+      <input type="hidden" id="editInstallmentId">
+      <div class="form-grid">
+        <div class="field full"><label>Descrição</label><input id="installmentDescription" required placeholder="Ex.: notebook, celular, móveis"></div>
+        <div><label>Valor da parcela</label><input type="number" id="installmentAmount" min="0.01" step="0.01" required></div>
+        <div><label>Total de parcelas</label><input type="number" id="installmentTotal" min="1" step="1" value="1" required></div>
+        <div><label>Primeira parcela</label><input type="month" id="installmentStart" required></div>
+        <div><label>Categoria</label><input id="installmentCategory" list="categoryOptions" value="Compras" required></div>
+        <div><label>Conta / cartão</label><input id="installmentAccount" list="accountOptions"></div>
+        <div class="field full"><button class="btn" type="submit" style="width:100%">Salvar parcelamento</button></div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal" id="settingsModal">
   <div class="modal-sheet">
     <div class="modal-head"><h2>Configuração rápida</h2><button class="close" onclick="closeModal('settingsModal')">✕</button></div>
@@ -472,7 +524,7 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
 
 <script id="embedded-data" type="application/json">
 {
-  "version": 2,
+  "version": 2.1,
   "settings": {
     "appName": "Meu Financeiro",
     "initialBalance": 0,
@@ -481,6 +533,8 @@ hr{border:0;border-top:1px solid var(--line);margin:16px 0}
   },
   "transactions": [],
   "goals": [],
+  "recurring": [],
+  "installments": [],
   "categoryBudgets": {
     "Alimentação": 0,
     "Transporte": 0,
@@ -507,16 +561,18 @@ let state=loadState();
 function deepCopy(o){return JSON.parse(JSON.stringify(o))}
 function initialState(){
   try{return JSON.parse(document.getElementById("embedded-data").textContent)}
-  catch(e){return {version:2,settings:{appName:"Meu Financeiro",initialBalance:0,monthlyLimit:2500,theme:"light"},transactions:[],goals:[],categoryBudgets:{},health:{},weeklyChecks:[false,false,false,false]}}
+  catch(e){return {version:2.1,settings:{appName:"Meu Financeiro",initialBalance:0,monthlyLimit:2500,theme:"light"},transactions:[],goals:[],recurring:[],installments:[],categoryBudgets:{},health:{},weeklyChecks:[false,false,false,false]}}
 }
 function normalizeState(s){
   const base=initialState();
   s=s&&typeof s==="object"?s:{};
   return {
-    version:2,
+    version:2.1,
     settings:{...base.settings,...(s.settings||{})},
     transactions:Array.isArray(s.transactions)?s.transactions:[],
     goals:Array.isArray(s.goals)?s.goals:[],
+    recurring:Array.isArray(s.recurring)?s.recurring:[],
+    installments:Array.isArray(s.installments)?s.installments:[],
     categoryBudgets:{...base.categoryBudgets,...(s.categoryBudgets||{})},
     health:s.health&&typeof s.health==="object"?s.health:{},
     weeklyChecks:Array.isArray(s.weeklyChecks)?s.weeklyChecks:base.weeklyChecks
@@ -755,7 +811,55 @@ function renderPlanner(){
   const planned=[...state.transactions].filter(t=>t.status==="planned").sort((a,b)=>a.date.localeCompare(b.date));
   document.getElementById("plannedList").innerHTML=planned.length?planned.map(transactionItemHTML).join(""):'<div class="empty">Nenhuma conta programada.</div>';
   renderCategorySummary(catSpending);
+  renderRecurring();
+  renderInstallments();
 }
+
+function monthAdd(month,add){
+  const [y,m]=month.split("-").map(Number);const d=new Date(y,m-1+add,1);return d.toISOString().slice(0,7)
+}
+function monthDiff(start,end){
+  const [sy,sm]=start.split("-").map(Number),[ey,em]=end.split("-").map(Number);return (ey-sy)*12+(em-sm)
+}
+function dateFromMonthDay(month,day){
+  const [y,m]=month.split("-").map(Number);const last=new Date(y,m,0).getDate();return `${month}-${String(clamp(num(day)||1,1,last)).padStart(2,"0")}`
+}
+function plannedExists(source,id,month){return state.transactions.some(t=>t.source===source&&t.sourceId===id&&monthISO(t.date)===month)}
+function recurringItemHTML(r){
+  return `<div class="item"><div class="item-icon">↻</div><div><div class="item-title">${escapeHTML(r.description)}</div><div class="item-sub">Dia ${r.day} · ${TYPE_LABEL[r.type]||r.type} · ${escapeHTML(r.category||"Outros")} ${r.account?"· "+escapeHTML(r.account):""}</div></div><div class="right"><div class="item-value ${TYPE_COLOR[r.type]||""}">${r.type==="income"?"+":"−"} ${money(r.amount)}</div><div class="item-actions"><button class="link-btn" onclick="editRecurring(${r.id})">Editar</button><button class="link-btn" onclick="deleteRecurring(${r.id})">Excluir</button></div></div></div>`
+}
+function installmentItemHTML(i){
+  const current=clamp(monthDiff(i.startMonth,monthISO())+1,0,num(i.total));
+  const remaining=Math.max(0,num(i.total)-current+1);
+  return `<div class="item"><div class="item-icon">▦</div><div><div class="item-title">${escapeHTML(i.description)}</div><div class="item-sub"><span class="badge">${current||0}/${i.total}</span> · início ${i.startMonth} · ${escapeHTML(i.category||"Compras")}</div></div><div class="right"><div class="item-value bad">− ${money(i.amount)}</div><div class="tiny muted">restante: ${money(remaining*num(i.amount))}</div><div class="item-actions"><button class="link-btn" onclick="editInstallment(${i.id})">Editar</button><button class="link-btn" onclick="deleteInstallment(${i.id})">Excluir</button></div></div></div>`
+}
+function renderRecurring(){
+  const el=document.getElementById("recurringList");if(!el)return;
+  el.innerHTML=state.recurring.length?state.recurring.map(recurringItemHTML).join(""):'<div class="empty">Nenhuma recorrência cadastrada.</div>'
+}
+function renderInstallments(){
+  const el=document.getElementById("installmentList");if(!el)return;
+  el.innerHTML=state.installments.length?state.installments.map(installmentItemHTML).join(""):'<div class="empty">Nenhum parcelamento cadastrado.</div>'
+}
+function openRecurringModal(){
+  document.getElementById("recurringForm").reset();document.getElementById("editRecurringId").value="";document.getElementById("recurringDay").value=new Date().getDate();openModal("recurringModal")
+}
+function editRecurring(id){const r=state.recurring.find(x=>x.id===id);if(!r)return;document.getElementById("editRecurringId").value=id;document.getElementById("recurringDescription").value=r.description;document.getElementById("recurringType").value=r.type;document.getElementById("recurringAmount").value=r.amount;document.getElementById("recurringDay").value=r.day;document.getElementById("recurringCategory").value=r.category||"";document.getElementById("recurringAccount").value=r.account||"";openModal("recurringModal")}
+function deleteRecurring(id){if(confirm("Excluir esta recorrência?")){state.recurring=state.recurring.filter(r=>r.id!==id);saveState("Recorrência excluída.")}}
+function generateRecurringForMonth(){
+  const month=monthISO();let added=0;
+  state.recurring.forEach(r=>{if(plannedExists("recurring",r.id,month))return;state.transactions.push({id:uid()+added,type:r.type,description:r.description,amount:num(r.amount),date:dateFromMonthDay(month,r.day),category:r.category||"Outros",account:r.account||"",status:"planned",note:"Gerado automaticamente pela recorrência.",source:"recurring",sourceId:r.id});added++});
+  saveState(added?`${added} lançamento(s) recorrente(s) gerado(s).`:"Nada novo para gerar neste mês.")
+}
+function openInstallmentModal(){document.getElementById("installmentForm").reset();document.getElementById("editInstallmentId").value="";document.getElementById("installmentStart").value=monthISO();document.getElementById("installmentCategory").value="Compras";openModal("installmentModal")}
+function editInstallment(id){const i=state.installments.find(x=>x.id===id);if(!i)return;document.getElementById("editInstallmentId").value=id;document.getElementById("installmentDescription").value=i.description;document.getElementById("installmentAmount").value=i.amount;document.getElementById("installmentTotal").value=i.total;document.getElementById("installmentStart").value=i.startMonth;document.getElementById("installmentCategory").value=i.category||"Compras";document.getElementById("installmentAccount").value=i.account||"";openModal("installmentModal")}
+function deleteInstallment(id){if(confirm("Excluir este parcelamento?")){state.installments=state.installments.filter(i=>i.id!==id);saveState("Parcelamento excluído.")}}
+function generateInstallmentsForMonth(){
+  const month=monthISO();let added=0;
+  state.installments.forEach(i=>{const idx=monthDiff(i.startMonth,month)+1;if(idx<1||idx>num(i.total)||plannedExists("installment",i.id,month))return;state.transactions.push({id:uid()+added,type:"expense",description:`${i.description} (${idx}/${i.total})`,amount:num(i.amount),date:dateFromMonthDay(month,5),category:i.category||"Compras",account:i.account||"",status:"planned",note:"Gerado automaticamente pelo parcelamento.",source:"installment",sourceId:i.id});added++});
+  saveState(added?`${added} parcela(s) gerada(s) para o mês atual.`:"Nada novo para gerar neste mês.")
+}
+
 function categoryTotals(month){
   const out={};
   state.transactions.filter(t=>t.status!=="planned"&&t.type==="expense"&&monthISO(t.date)===month).forEach(t=>out[t.category||"Outros"]=(out[t.category||"Outros"]||0)+num(t.amount));
@@ -830,6 +934,9 @@ function renderAssistant(){
   }
   const cats=Object.entries(categoryTotals(m)).sort((a,b)=>b[1]-a[1]);
   if(cats.length)tips.push(["Maior categoria de gasto",`${cats[0][0]} representa ${money(cats[0][1])} no mês. Verifique se existe algum valor evitável ou negociável.`]);
+  const openInstallments=(state.installments||[]).reduce((a,i)=>{const current=clamp(monthDiff(i.startMonth,m)+1,0,num(i.total));return a+Math.max(0,num(i.total)-current+1)*num(i.amount)},0);
+  if(openInstallments>0)tips.push(["Parcelamentos em aberto",`O valor aproximado ainda comprometido em parcelas é ${money(openInstallments)}. Evite novas parcelas antes de conferir o saldo projetado.`]);
+  if((state.recurring||[]).length)tips.push(["Automação mensal",`Você tem ${state.recurring.length} recorrência(s) cadastrada(s). Gere o mês atual no Planejamento para não esquecer contas fixas.`]);
   const plannedExpenses=state.transactions.filter(t=>t.status==="planned"&&t.type!=="income").reduce((a,t)=>a+num(t.amount),0);
   if(plannedExpenses>0)tips.push(["Compromissos futuros",`Há ${money(plannedExpenses)} em gastos e investimentos planejados. O saldo projetado é ${money(projectedBalance())}.`]);
   const h=state.health[todayISO()];
@@ -930,6 +1037,22 @@ document.getElementById("goalForm").addEventListener("submit",e=>{
   const idx=state.goals.findIndex(x=>x.id===id);if(idx>=0)state.goals[idx]=g;else state.goals.push(g);
   closeModal("goalModal");saveState(idx>=0?"Meta atualizada.":"Meta criada.")
 });
+
+document.getElementById("recurringForm").addEventListener("submit",e=>{
+  e.preventDefault();const id=num(document.getElementById("editRecurringId").value);
+  const r={id:id||uid(),description:document.getElementById("recurringDescription").value.trim(),type:document.getElementById("recurringType").value,amount:num(document.getElementById("recurringAmount").value),day:clamp(num(document.getElementById("recurringDay").value),1,31),category:document.getElementById("recurringCategory").value.trim()||"Outros",account:document.getElementById("recurringAccount").value.trim()};
+  if(!r.description||r.amount<=0){alert("Preencha descrição e valor.");return}
+  const idx=state.recurring.findIndex(x=>x.id===id);if(idx>=0)state.recurring[idx]=r;else state.recurring.push(r);
+  closeModal("recurringModal");saveState(idx>=0?"Recorrência atualizada.":"Recorrência criada.")
+});
+document.getElementById("installmentForm").addEventListener("submit",e=>{
+  e.preventDefault();const id=num(document.getElementById("editInstallmentId").value);
+  const i={id:id||uid(),description:document.getElementById("installmentDescription").value.trim(),amount:num(document.getElementById("installmentAmount").value),total:Math.max(1,Math.round(num(document.getElementById("installmentTotal").value))),startMonth:document.getElementById("installmentStart").value||monthISO(),category:document.getElementById("installmentCategory").value.trim()||"Compras",account:document.getElementById("installmentAccount").value.trim()};
+  if(!i.description||i.amount<=0){alert("Preencha descrição e valor da parcela.");return}
+  const idx=state.installments.findIndex(x=>x.id===id);if(idx>=0)state.installments[idx]=i;else state.installments.push(i);
+  closeModal("installmentModal");saveState(idx>=0?"Parcelamento atualizado.":"Parcelamento criado.")
+});
+
 document.getElementById("healthForm").addEventListener("submit",e=>{
   e.preventDefault();const date=document.getElementById("healthDate").value;
   state.health[date]={waterMl:document.getElementById("waterMl").value===""?"":num(document.getElementById("waterMl").value),sleepHours:document.getElementById("sleepHours").value===""?"":num(document.getElementById("sleepHours").value),exerciseMin:document.getElementById("exerciseMin").value===""?"":num(document.getElementById("exerciseMin").value),mood:document.getElementById("mood").value,stress:document.getElementById("stress").value,note:document.getElementById("healthNote").value.trim(),noImpulse:document.getElementById("noImpulse").checked};

@@ -1,27 +1,12 @@
-MEU FINANCEIRO & SAÚDE — VERSÃO PWA
+Meu Financeiro & Saúde - Versão 2.0 otimizada
 
-ARQUIVOS DESTA PASTA
+Arquivos preparados para substituir exatamente os arquivos existentes no repositório GitHub:
 - index.html
-- manifest.webmanifest
+- manifesto.webmanifesto
 - service-worker.js
-- icon-192.png
-- icon-512.png
-- icon-maskable-512.png
+- ícone-192.png
+- ícone-512.png
+- ícone-mascarável-512.png
 
-PUBLICAR GRATUITAMENTE NO GITHUB PAGES
-1. Entre em https://github.com e crie uma conta gratuita, caso ainda não tenha.
-2. Crie um repositório público chamado: meu-financeiro-app
-3. Use Add file > Upload files.
-4. Envie TODOS os seis arquivos desta pasta, sem criar uma subpasta.
-5. Confirme em Commit changes.
-6. Abra Settings > Pages.
-7. Em Build and deployment, selecione Deploy from a branch.
-8. Selecione a branch main e a pasta /(root). Salve.
-9. Aguarde a publicação e abra o endereço fornecido pelo GitHub Pages.
-10. No Chrome do Android, abra o menu de três pontos e toque em Adicionar à tela inicial > Instalar.
-
-IMPORTANTE SOBRE PRIVACIDADE
-Publique somente esta versão vazia do aplicativo. Nunca envie ao GitHub um HTML atualizado que contenha seus lançamentos pessoais incorporados. Os lançamentos feitos no aplicativo publicado ficam no armazenamento local do navegador do seu aparelho e não são enviados automaticamente ao GitHub.
-
-BACKUP
-Use regularmente Exportar JSON dentro do aplicativo. O backup é necessário se você limpar os dados do Chrome, trocar de aparelho ou desinstalar o aplicativo.
+Envie estes arquivos extraídos para o GitHub usando a opção Código > Carregar arquivos.
+Não envie o arquivo ZIP diretamente.
