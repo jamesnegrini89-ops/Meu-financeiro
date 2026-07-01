@@ -1,258 +1,195 @@
-✅ **PERFEITO!** Agora está no lugar certo!
+// ==================== TRANSACTIONS.JS ====================
+// Gerenciamento de transações
 
-Veja o caminho no topo: `Meu-financeiro / js / transactions.js` ✅
+let editingTransactionId = null;
 
-Agora cole o código completo do `transactions.js`:
-
-```javascript
-// ==================== TRANSAÇÕES ====================
-
-function showTransactionModal(id = null) {
+// Abrir modal de nova transação
+function openTransactionModal() {
+  editingTransactionId = null;
+  document.getElementById('transaction-modal-title').textContent = 'Nova Transação';
+  document.getElementById('transaction-form').reset();
+  document.getElementById('trans-date').valueAsDate = new Date();
   document.getElementById('transaction-modal').classList.add('active');
+}
+
+// Fechar modal de transação
+function closeTransactionModal() {
+  document.getElementById('transaction-modal').classList.remove('active');
+  document.getElementById('transaction-form').reset();
+  editingTransactionId = null;
+}
+
+// Atualizar opções de categoria baseado no tipo
+function updateCategoryOptions() {
+  const type = document.getElementById('trans-type').value;
+  const categorySelect = document.getElementById('trans-category');
   
-  if (id) {
-    const trans = state.transactions.find(t => t.id === id);
-    if (!trans) return;
-    
-    document.getElementById('trans-id').value = trans.id;
-    document.getElementById('trans-type').value = trans.type;
-    document.getElementById('trans-value').value = trans.value;
-    document.getElementById('trans-category').value = trans.category;
-    document.getElementById('trans-account').value = trans.account || '';
-    document.getElementById('trans-date').value = trans.date.split('T')[0];
-    document.getElementById('trans-description').value = trans.description || '';
-    document.getElementById('trans-recurring').checked = trans.recurring || false;
-    document.getElementById('trans-tags').value = trans.tags ? trans.tags.join(', ') : '';
-  } else {
-    document.getElementById('transaction-form').reset();
-    document.getElementById('trans-id').value = '';
-    document.getElementById('trans-date').value = new Date().toISOString().split('T')[0];
+  categorySelect.innerHTML = '<option value="">Selecione uma categoria</option>';
+  
+  if (type === 'income') {
+    CATEGORIES.income.forEach(cat => {
+      categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+    });
+  } else if (type === 'expense') {
+    CATEGORIES.expense.forEach(cat => {
+      categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+    });
   }
 }
 
-function saveTransaction(event) {
-  event.preventDefault();
-  
-  const id = document.getElementById('trans-id').value;
+// Salvar transação
+function saveTransaction() {
   const type = document.getElementById('trans-type').value;
-  const value = parseFloat(document.getElementById('trans-value').value);
   const category = document.getElementById('trans-category').value;
-  const account = document.getElementById('trans-account').value;
+  const value = parseFloat(document.getElementById('trans-value').value);
   const date = document.getElementById('trans-date').value;
   const description = document.getElementById('trans-description').value;
-  const recurring = document.getElementById('trans-recurring').checked;
-  const tags = document.getElementById('trans-tags').value.split(',').map(t => t.trim()).filter(t => t);
-  
-  if (!value || !category) {
-    showToast('Preencha valor e categoria', 'error');
+
+  if (!type || !category || !value || !date) {
+    alert('Preencha todos os campos obrigatórios!');
     return;
   }
-  
+
   const transaction = {
-    id: id ? parseInt(id) : Date.now(),
+    id: editingTransactionId || Date.now(),
     type,
-    value,
     category,
-    account,
-    date: date || new Date().toISOString(),
-    description,
-    recurring,
-    tags
+    value,
+    date,
+    description
   };
-  
-  if (id) {
-    const index = state.transactions.findIndex(t => t.id === parseInt(id));
-    const oldTrans = state.transactions[index];
-    state.transactions[index] = transaction;
-    
-    if (oldTrans.type === 'income') state.balance -= oldTrans.value;
-    else state.balance += oldTrans.value;
-    
-    if (transaction.type === 'income') state.balance += transaction.value;
-    else state.balance -= transaction.value;
-    
-    showToast('Lançamento atualizado!');
+
+  let transactions = getTransactions();
+
+  if (editingTransactionId) {
+    const index = transactions.findIndex(t => t.id === editingTransactionId);
+    transactions[index] = transaction;
   } else {
-    state.transactions.push(transaction);
-    
-    if (type === 'income') state.balance += value;
-    else state.balance -= value;
-    
-    showToast('Lançamento adicionado!');
+    transactions.push(transaction);
   }
-  
-  saveState();
-  closeModal('transaction-modal');
-  renderHome();
+
+  saveTransactions(transactions);
+  closeTransactionModal();
   renderTransactions();
-  renderBudget();
-  updateCharts();
+  updateDashboard();
 }
 
-function deleteTransaction(id) {
-  if (!confirm('Excluir este lançamento?')) return;
-  
-  const trans = state.transactions.find(t => t.id === id);
-  if (!trans) return;
-  
-  if (trans.type === 'income') state.balance -= trans.value;
-  else state.balance += trans.value;
-  
-  state.transactions = state.transactions.filter(t => t.id !== id);
-  saveState();
-  
-  showToast('Lançamento excluído');
-  renderHome();
-  renderTransactions();
-  renderBudget();
-  updateCharts();
-}
-
+// Renderizar lista de transações
 function renderTransactions() {
-  const list = document.getElementById('transactions-list');
-  const filterMonth = document.getElementById('filter-month').value;
-  const filterCategory = document.getElementById('filter-category').value;
-  const filterType = document.getElementById('filter-type').value;
-  const search = document.getElementById('search-trans').value.toLowerCase();
-  
-  let filtered = state.transactions.filter(t => {
-    const date = new Date(t.date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    
-    if (filterMonth && monthKey !== filterMonth) return false;
-    if (filterCategory && t.category !== filterCategory) return false;
-    if (filterType && t.type !== filterType) return false;
-    if (search && !t.description.toLowerCase().includes(search) && !t.category.toLowerCase().includes(search)) return false;
-    
-    return true;
-  });
-  
-  filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-  
-  if (filtered.length === 0) {
-    list.innerHTML = '<p class="muted" style="text-align: center; padding: 40px 20px;">Nenhum lançamento encontrado</p>';
+  const transactions = getFilteredTransactions();
+  const container = document.getElementById('transactions-list');
+
+  if (transactions.length === 0) {
+    container.innerHTML = '<p class="muted" style="text-align: center; padding: 40px 0;">Nenhuma transação encontrada</p>';
     return;
   }
-  
-  let html = '';
-  let lastDate = '';
-  
-  filtered.forEach(t => {
-    const date = new Date(t.date);
-    const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-    
-    if (dateStr !== lastDate) {
-      html += `<div class="date-divider">${dateStr}</div>`;
-      lastDate = dateStr;
-    }
-    
-    const icon = getCategoryIcon(t.category);
-    const color = t.type === 'income' ? 'good' : 'bad';
-    const sign = t.type === 'income' ? '+' : '-';
-    
+
+  let html = '<div class="transaction-list">';
+
+  transactions.forEach(t => {
+    const typeIcon = t.type === 'income' ? '💰' : '💸';
+    const typeClass = t.type === 'income' ? 'good' : 'bad';
+    const formattedValue = formatCurrency(t.value);
+    const formattedDate = formatDate(t.date);
+
     html += `
-      <div class="transaction-item" onclick="showTransactionModal(${t.id})">
-        <div class="trans-icon">${icon}</div>
-        <div class="trans-info">
-          <b>${t.category}</b>
-          ${t.description ? `<small class="muted">${t.description}</small>` : ''}
-          ${t.tags.length ? `<div class="tags">${t.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}</div>` : ''}
+      <div class="transaction-item">
+        <div class="transaction-info">
+          <div class="transaction-header">
+            <span class="transaction-icon">${typeIcon}</span>
+            <div>
+              <div class="transaction-category">${t.category}</div>
+              ${t.description ? `<div class="transaction-description">${t.description}</div>` : ''}
+            </div>
+          </div>
+          <div class="transaction-meta">
+            <span class="transaction-date">${formattedDate}</span>
+          </div>
         </div>
-        <div class="trans-value ${color}">
-          <b>${sign} R$ ${t.value.toFixed(2)}</b>
-          ${t.account ? `<small class="muted">${t.account}</small>` : ''}
+        <div class="transaction-actions">
+          <span class="transaction-value ${typeClass}">${formattedValue}</span>
+          <button class="btn-icon" onclick="editTransaction(${t.id})" title="Editar">✏️</button>
+          <button class="btn-icon" onclick="deleteTransaction(${t.id})" title="Excluir">🗑️</button>
         </div>
       </div>
     `;
   });
-  
-  list.innerHTML = html;
+
+  html += '</div>';
+  container.innerHTML = html;
 }
 
-function getCategoryIcon(category) {
-  const icons = {
-    'Alimentação': '🍔',
-    'Transporte': '🚗',
-    'Moradia': '🏠',
-    'Saúde': '💊',
-    'Educação': '📚',
-    'Lazer': '🎮',
-    'Investimentos': '📈',
-    'Salário': '💰',
-    'Freelance': '💻',
-    'Outros': '📦'
-  };
-  return icons[category] || '💸';
+// Editar transação
+function editTransaction(id) {
+  const transactions = getTransactions();
+  const transaction = transactions.find(t => t.id === id);
+
+  if (!transaction) return;
+
+  editingTransactionId = id;
+  document.getElementById('transaction-modal-title').textContent = 'Editar Transação';
+  document.getElementById('trans-type').value = transaction.type;
+  updateCategoryOptions();
+  document.getElementById('trans-category').value = transaction.category;
+  document.getElementById('trans-value').value = transaction.value;
+  document.getElementById('trans-date').value = transaction.date;
+  document.getElementById('trans-description').value = transaction.description || '';
+  document.getElementById('transaction-modal').classList.add('active');
 }
 
+// Excluir transação
+function deleteTransaction(id) {
+  if (!confirm('Tem certeza que deseja excluir esta transação?')) return;
+
+  let transactions = getTransactions();
+  transactions = transactions.filter(t => t.id !== id);
+  saveTransactions(transactions);
+  renderTransactions();
+  updateDashboard();
+}
+
+// Aplicar filtros
 function applyFilters() {
   renderTransactions();
 }
 
+// Limpar filtros
 function clearFilters() {
-  document.getElementById('filter-month').value = '';
-  document.getElementById('filter-category').value = '';
   document.getElementById('filter-type').value = '';
-  document.getElementById('search-trans').value = '';
+  document.getElementById('filter-category').value = '';
+  document.getElementById('filter-month').value = '';
   renderTransactions();
 }
 
-function renderHome() {
-  document.getElementById('main-balance').textContent = `R$ ${state.balance.toFixed(2)}`;
+// Obter transações filtradas
+function getFilteredTransactions() {
+  let transactions = getTransactions();
   
-  const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  
-  const thisMonthTransactions = state.transactions.filter(t => {
-    const date = new Date(t.date);
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    return monthKey === currentMonth;
-  });
-  
-  const income = thisMonthTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.value, 0);
-  const expenses = thisMonthTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.value, 0);
-  const economy = income - expenses;
-  
-  document.getElementById('summary-income').textContent = `R$ ${income.toFixed(2)}`;
-  document.getElementById('summary-expenses').textContent = `R$ ${expenses.toFixed(2)}`;
-  document.getElementById('summary-economy').textContent = `R$ ${economy.toFixed(2)}`;
-  
-  const recentTransactions = [...state.transactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-  const recentList = document.getElementById('recent-transactions');
-  
-  if (recentTransactions.length === 0) {
-    recentList.innerHTML = '<p class="muted">Nenhum lançamento recente</p>';
-    return;
+  const typeFilter = document.getElementById('filter-type').value;
+  const categoryFilter = document.getElementById('filter-category').value;
+  const monthFilter = document.getElementById('filter-month').value;
+
+  if (typeFilter) {
+    transactions = transactions.filter(t => t.type === typeFilter);
   }
+
+  if (categoryFilter) {
+    transactions = transactions.filter(t => t.category === categoryFilter);
+  }
+
+  if (monthFilter) {
+    transactions = transactions.filter(t => t.date.startsWith(monthFilter));
+  }
+
+  return transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+// Preencher select de categorias no filtro
+function populateFilterCategories() {
+  const select = document.getElementById('filter-category');
+  const allCategories = [...CATEGORIES.income, ...CATEGORIES.expense];
   
-  let html = '';
-  recentTransactions.forEach(t => {
-    const icon = getCategoryIcon(t.category);
-    const color = t.type === 'income' ? 'good' : 'bad';
-    const sign = t.type === 'income' ? '+' : '-';
-    
-    html += `
-      <div class="transaction-item" onclick="showTransactionModal(${t.id})">
-        <div class="trans-icon">${icon}</div>
-        <div class="trans-info">
-          <b>${t.category}</b>
-          <small class="muted">${new Date(t.date).toLocaleDateString('pt-BR')}</small>
-        </div>
-        <div class="trans-value ${color}">
-          <b>${sign} R$ ${t.value.toFixed(2)}</b>
-        </div>
-      </div>
-    `;
+  allCategories.forEach(cat => {
+    select.innerHTML += `<option value="${cat}">${cat}</option>`;
   });
-  
-  recentList.innerHTML = html;
 }
-
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('active');
-}
-```
-
-Depois de colar, clique em **"Commit changes..."** → **"Commit changes"**.
-
-Me avisa quando terminar! 🚀
